@@ -213,9 +213,55 @@ public class Car {
 
 ### YAML配置文件
 
+### 静态资源配置
+
+#### 静态资源目录
+
+只要静态资源放在类路径下： called `/static` (or `/public` or `/resources` or `/META-INF/resources`
+
+访问 ： 当前项目根路径/ + 静态资源名 
 
 
 
+原理： 静态映射/**。
+
+请求进来，先去找Controller看能不能处理。不能处理的所有请求又都交给静态资源处理器。静态资源也找不到则响应404页面
+
+改变默认的静态资源路径： 以后请求需要加前缀才能访问到
+
+```yaml
+spring:
+  mvc:
+    static-path-pattern: /res/**
+```
+
+#### 静态资源存储策略
+
+修改SpringBoot的静态资源存储位置
+
+```yaml
+spring:
+  resources:
+    static-locations: [classpath:/haha/]
+```
+
+现在必须静态资源扫描默认到类路径下的haha文件夹下面去找，所以原先springboot指定的静态资源目录都失效了。
+
+#### webjar
+
+自动映射 /[webjars](http://localhost:8080/webjars/jquery/3.5.1/jquery.js)/**。也就是说只要导入了webjars里面的依赖，比如jquery,bootstrap等，如果你要访问这里面的文件也就是你要在Html文件中引入javascript(jquery)，你可以使用/web/xxx的方式来加载静态资源，也就不需要自己添加到resources里面了。
+
+webjars的网站：https://www.webjars.org/
+
+```xml
+<dependency>
+    <groupId>org.webjars</groupId>
+    <artifactId>jquery</artifactId>
+    <version>3.5.1</version>
+</dependency>
+```
+
+访问地址：[http://localhost:8080/webjars/**jquery/3.5.1/jquery.js**](http://localhost:8080/webjars/jquery/3.5.1/jquery.js)   后面地址要按照依赖里面的包路径
 
 ## 注意事项
 
