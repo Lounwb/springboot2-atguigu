@@ -10,6 +10,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="boot-01-helloworld" />
         <module name="boot-05-web" />
+        <module name="boot-05-admin" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel target="8" />
@@ -17,6 +18,7 @@
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="boot-01-helloworld" options="-parameters" />
+      <module name="boot-05-admin" options="-parameters" />
       <module name="boot-05-web" options="-parameters" />
     </option>
   </component>

@@ -165,11 +165,11 @@ public class Car {
    <beans xmlns="http://www.springframework.org/schema/beans"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
-       <bean id="user01" class="com.lounwb.boot.bean.User">
+       <bean id="user01" class="com.lounwb.admin.bean.User">
            <property name="name" value="zhangsan"></property>
            <property name="age" value="18"></property>
        </bean>
-       <bean id="cat" class="com.lounwb.boot.bean.Pet">
+       <bean id="cat" class="com.lounwb.admin.bean.Pet">
            <property name="name" value="tomcat"></property>
        </bean>
    </beans>
@@ -208,6 +208,57 @@ public class Car {
 #### @EnableConfigurationProperties
 
 使用效果同@Component+@ConfigurationProperties。不过这种方法适用于想把第三方库中的类注册到容器中，使用方法为：@EnableConfigurationProperties(xxx.class)。
+
+### 请求参数注解
+
+#### @RequestParam
+
+标注在形参上面
+
+```java
+@RequestMapping("/hello")
+public String handle01(@RequestParam("name") String name){
+    log.info(name + "访问/hello");
+    return "Hello,Spring boot2! " + name;
+}
+```
+
+#### @PathVariable
+
+从请求路径中动态获取参数
+
+例如请求为localhost:8080/car/88/owner/zhangsan
+
+如果想拿到88和zhangsan可以搭配@GetMapping使用
+
+```java
+@GetMapping("/car/{id}/owner/{username}")
+public Map<String, Object> getCar(@PathVariable("id") Integer id,
+                                  @PathVariable("username") String username,
+                                  @PathVariable Map<String, String> pv) {
+    Map<String, Object> map = new HashMap<>();
+
+    map.put("id", id);
+    map.put("username", username);
+    map.put("pv", pv);
+    return map;
+}
+```
+
+#### @RequestHeader
+
+```java
+@RequestHeader("User-Agent") String userAgent,
+@RequestHeader Map<String, String> headers
+```
+
+#### 其他参数注解
+
+@CookieValue、@RequestBody
+
+## 项目实战
+
+
 
 ## 配置文件
 
@@ -263,11 +314,60 @@ webjars的网站：https://www.webjars.org/
 
 访问地址：[http://localhost:8080/webjars/**jquery/3.5.1/jquery.js**](http://localhost:8080/webjars/jquery/3.5.1/jquery.js)   后面地址要按照依赖里面的包路径
 
+
+
 ## 注意事项
 
 1. javabean的注入顺序
 
    ![](https://raw.githubusercontent.com/Lounwb/imgbed-picgo-repo/master/blogimg/202301192132633.png)
+
+#### 转发的使用
+
+```java
+@Controller
+public class RequestController {
+    @GetMapping("/goto")
+    public String goToPage(HttpServletRequest request){
+        request.setAttribute("msg", "转发成功...");
+        request.setAttribute("code", 200);
+        return "forward:/success";
+    }
+    @ResponseBody
+    @GetMapping("/success")
+    public Map success(@RequestAttribute String msg,
+                       @RequestAttribute Integer code,
+                       HttpServletRequest request){
+        Map<String, Object> map = new HashMap<>();
+
+        Object msg1 = request.getAttribute("msg");
+
+        map.put("msg", msg);
+        map.put("msg1", msg1);
+        map.put("code", code);
+        return map;
+    }
+}
+```
+
+这也是相当转发，如果刷新/login页面会一直重复提交表单
+
+```java
+@GetMapping({"/","/login"})
+    public String loginPage(){
+        return "login";
+    }
+@PostMapping("/login")
+    public  String main(String username,
+                        String password){
+        return "main";
+    }
+// 发送/请求或者/login，跳转到templates/login.index页面
+```
+
+#### 重定向
+
+
 
 ## 开发技巧
 
@@ -370,6 +470,99 @@ springboot已经管理了lombok的版本，所以我们只需要引入lombok即�
         </plugin>
     </plugins>
 </build>
+```
+
+### Thymeleaf
+
+thymeleaf是一个现代化服务端的java模板引擎。**https://www.thymeleaf.org/**
+
+**Thymeleaf** is a modern server-side Java template engine for both web and standalone environments.
+
+Thymeleaf's main goal is to bring elegant *natural templates* to your development workflow — HTML that can be correctly displayed in browsers and also work as static prototypes, allowing for stronger collaboration in development teams.
+
+With modules for Spring Framework, a host of integrations with your favourite tools, and the ability to plug in your own functionality, Thymeleaf is ideal for modern-day HTML5 JVM web development — although there is much more it can do.
+
+| 表达式名字 | 语法   | 用途                               |
+| ---------- | ------ | ---------------------------------- |
+| 变量取值   | ${...} | 获取请求域、session域、对象等值    |
+| 选择变量   | *{...} | 获取上下文对象值                   |
+| 消息       | #{...} | 获取国际化等值                     |
+| 链接       | @{...} | 生成链接                           |
+| 片段表达式 | ~{...} | jsp:include 作用，引入公共页面片段 |
+
+**引入starter**
+
+```xml
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+```
+
+**在页面上引入thymeleaf**
+
+```html
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+```
+
+**迭代**
+
+```html
+<tr th:each="prod : ${prods}">
+        <td th:text="${prod.name}">Onions</td>
+        <td th:text="${prod.price}">2.41</td>
+        <td th:text="${prod.inStock}? #{true} : #{false}">yes</td>
+</tr>
+```
+
+**抽取公共页面**
+
+1.选择片段
+
+使用th:gragment="xxx"
+
+```html
+<head th:fragment="commmonheader">
+    <!--common-->
+    <link href="css/style.css" th:href="@{/css/style.css}" rel="stylesheet">
+    <link href="css/style-responsive.css" th:href="@{/css/style-responsive.css}" rel="stylesheet">
+
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]-->
+    <script src="js/html5shiv.js" th:src="@{/js/html5shiv.js}"></script>
+    <script src="js/respond.min.js" th:src="@{/js/respond.min.js}"></script>
+    <!--[endif]-->
+</head>
+```
+
+2.引入片段
+
+```html
+<div th:insert="footer :: copy"></div>
+<!-- 效果：-->
+	<div>
+        <footer>
+          &copy; 2011 The Good Thymes Virtual Grocery
+        </footer>
+  </div>
+<div th:replace="footer :: copy"></div>
+<!-- 效果：-->
+    <footer>
+        &copy; 2011 The Good Thymes Virtual Grocery
+      </footer>
+<div th:include="footer :: copy"></div>
+<!-- 效果：-->
+    <div>
+        &copy; 2011 The Good Thymes Virtual Grocery
+      </div>
+```
+
+```html
+<!-- 适合标签上无class，无样式-->
+<div th:include="common :: commmonheader"></div>
+<!-- 适合标签上有class需要导入样式-->
+<div th:replace="common :: leftmenu"></div>
 ```
 
 

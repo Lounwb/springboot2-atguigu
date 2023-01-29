@@ -2,75 +2,75 @@
   "groups": [
     {
       "name": "mycar",
-      "type": "com.lounwb.boot.bean.Car",
-      "sourceType": "com.lounwb.boot.bean.Car"
+      "type": "com.lounwb.admin.bean.Car",
+      "sourceType": "com.lounwb.admin.bean.Car"
     },
     {
       "name": "person",
-      "type": "com.lounwb.boot.bean.Person",
-      "sourceType": "com.lounwb.boot.bean.Person"
+      "type": "com.lounwb.admin.bean.Person",
+      "sourceType": "com.lounwb.admin.bean.Person"
     }
   ],
   "properties": [
     {
       "name": "mycar.brand",
       "type": "java.lang.String",
-      "sourceType": "com.lounwb.boot.bean.Car"
+      "sourceType": "com.lounwb.admin.bean.Car"
     },
     {
       "name": "mycar.price",
       "type": "java.lang.Integer",
-      "sourceType": "com.lounwb.boot.bean.Car"
+      "sourceType": "com.lounwb.admin.bean.Car"
     },
     {
       "name": "person.age",
       "type": "java.lang.Integer",
-      "sourceType": "com.lounwb.boot.bean.Person"
+      "sourceType": "com.lounwb.admin.bean.Person"
     },
     {
       "name": "person.all-pets",
-      "type": "java.util.Map<java.lang.String,java.util.List<com.lounwb.boot.bean.Pet>>",
-      "sourceType": "com.lounwb.boot.bean.Person"
+      "type": "java.util.Map<java.lang.String,java.util.List<com.lounwb.admin.bean.Pet>>",
+      "sourceType": "com.lounwb.admin.bean.Person"
     },
     {
       "name": "person.animal",
       "type": "java.util.List<java.lang.String>",
-      "sourceType": "com.lounwb.boot.bean.Person"
+      "sourceType": "com.lounwb.admin.bean.Person"
     },
     {
       "name": "person.birth",
       "type": "java.util.Date",
-      "sourceType": "com.lounwb.boot.bean.Person"
+      "sourceType": "com.lounwb.admin.bean.Person"
     },
     {
       "name": "person.boss",
       "type": "java.lang.Boolean",
-      "sourceType": "com.lounwb.boot.bean.Person"
+      "sourceType": "com.lounwb.admin.bean.Person"
     },
     {
       "name": "person.interests",
       "type": "java.lang.String[]",
-      "sourceType": "com.lounwb.boot.bean.Person"
+      "sourceType": "com.lounwb.admin.bean.Person"
     },
     {
       "name": "person.pet",
-      "type": "com.lounwb.boot.bean.Pet",
-      "sourceType": "com.lounwb.boot.bean.Person"
+      "type": "com.lounwb.admin.bean.Pet",
+      "sourceType": "com.lounwb.admin.bean.Person"
     },
     {
       "name": "person.salarys",
       "type": "java.util.Set<java.lang.Double>",
-      "sourceType": "com.lounwb.boot.bean.Person"
+      "sourceType": "com.lounwb.admin.bean.Person"
     },
     {
       "name": "person.score",
       "type": "java.util.Map<java.lang.String,java.lang.Object>",
-      "sourceType": "com.lounwb.boot.bean.Person"
+      "sourceType": "com.lounwb.admin.bean.Person"
     },
     {
       "name": "person.user-name",
       "type": "java.lang.String",
-      "sourceType": "com.lounwb.boot.bean.Person"
+      "sourceType": "com.lounwb.admin.bean.Person"
     }
   ],
   "hints": []
