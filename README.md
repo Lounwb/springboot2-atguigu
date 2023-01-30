@@ -392,7 +392,7 @@ springboot已经管理了lombok的版本，所以我们只需要引入lombok即�
 
 2.在javabean上标注注解
 
-#### @Data
+**@Data**
 
 相当于setter and getter
 
@@ -408,7 +408,7 @@ springboot已经管理了lombok的版本，所以我们只需要引入lombok即�
 
 无参构造器
 
-#### @Slf4j
+**@Slf4j**
 
 日志插件
 
@@ -484,7 +484,7 @@ With modules for Spring Framework, a host of integrations with your favourite to
 
 | 表达式名字 | 语法   | 用途                               |
 | ---------- | ------ | ---------------------------------- |
-| 变量取值   | ${...} | 获取请求域、session域、对象等值    |
+| 变量取值   | ${...} | 从请求域中取值                     |
 | 选择变量   | *{...} | 获取上下文对象值                   |
 | 消息       | #{...} | 获取国际化等值                     |
 | 链接       | @{...} | 生成链接                           |
@@ -563,6 +563,37 @@ With modules for Spring Framework, a host of integrations with your favourite to
 <div th:include="common :: commmonheader"></div>
 <!-- 适合标签上有class需要导入样式-->
 <div th:replace="common :: leftmenu"></div>
+```
+
+### 拦截器
+
+#### HandlerInterceptor 接口
+
+![](https://raw.githubusercontent.com/Lounwb/imgbed-picgo-repo/master/blogimg/202301301527002.png)
+
+添加拦截器的方法
+
+1、编写一个拦截器实现HandlerInterceptor接口
+
+2、将拦截器注册到容器中（实现WebMvcConfigurer的addInterceptors方法）
+
+3、指定拦截规则，拦截那些请求，放行那些请求。
+
+#### WebMvcConfigurer 接口
+
+如果配置类要实现web定制化操作需要实现WebMvcConfigurer接口
+
+```java
+@Configuration
+public class AdminWebConfig implements WebMvcConfigurer {
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new LoginInterceptor()).
+                addPathPatterns("/**").    //拦截所有请求包括静态资源
+                excludePathPatterns("/","/login","/css/**","/fonts/**","/images/**","/js/**");   //设置放行那些请求
+    }
+}
+
 ```
 
 

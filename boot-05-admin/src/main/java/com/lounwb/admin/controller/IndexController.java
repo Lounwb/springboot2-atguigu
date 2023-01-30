@@ -43,13 +43,26 @@ public class IndexController {
      */
     @GetMapping("/main.html")
     public String mainPage(HttpSession session, Model model){
-        Object user = session.getAttribute("user");
+        /*Object user = session.getAttribute("user");
         if (user != null) {
             return "main";
         }else {
             //返回登录页面
             model.addAttribute("msg", "请先登录");
             return "login";
-        }
+        }*/
+        return "main";
+    }
+
+    /**
+     * 登出
+     * @param session
+     * @return
+     */
+    @GetMapping("/logout")
+    public String logout(HttpSession session){
+        session.removeAttribute("user");
+
+        return "redirect:/";
     }
 }
