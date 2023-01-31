@@ -1,3 +1,5 @@
+[![Java CI](https://img.shields.io/github/actions/workflow/status/alibaba/fastjson2/ci.yaml?branch=main&logo=github&logoColor=white)](https://github.com/alibaba/fastjson2/actions/workflows/ci.yaml)
+
 # SpringBoot2-atguigu
 
 ## 快速开始
@@ -256,7 +258,142 @@ public Map<String, Object> getCar(@PathVariable("id") Integer id,
 
 @CookieValue、@RequestBody
 
-## 项目实战
+## web开发
+
+#### web原生组件注入（Servlet,Filter,Listener）
+
+**1.在主应用类上添加注释@ServletComponentScan(basePackages="servlet的扫描路径")**
+
+**2.编写原生Servlet**
+
+第一种方式：使用servlet3.x的注解形式@WebServlet(urlPatterns={"xxx"}) 或者***使用第二种方式见3.***
+
+原生Servlet的效果 是直接响应，不会经过Spring的拦截器。
+
+```java
+@WebServlet("/my")
+public class MyServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest request,
+                         HttpServletResponse response) throws ServletException, IOException {
+        response.getWriter().print("welcome to my servlet");
+    }
+}
+
+```
+
+**3.向容器中注入Servlet（使用RegistrationBean）**
+
+```java
+@Configuration
+public class MyRegistConfig {
+
+    @Bean
+    public ServletRegistrationBean myServlet(){
+        MyServlet myServlet = new MyServlet();
+
+        return new ServletRegistrationBean(myServlet,"/my","/my02");
+    }
+
+
+    @Bean
+    public FilterRegistrationBean myFilter(){
+
+        MyFilter myFilter = new MyFilter();
+//        return new FilterRegistrationBean(myFilter,myServlet());
+        FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean(myFilter);
+        filterRegistrationBean.setUrlPatterns(Arrays.asList("/my","/css/*"));
+        return filterRegistrationBean;
+    }
+
+    @Bean
+    public ServletListenerRegistrationBean myListener(){
+        MySwervletContextListener mySwervletContextListener = new MySwervletContextListener();
+        return new ServletListenerRegistrationBean(mySwervletContextListener);
+    }
+}
+```
+
+#### 数据访问
+
+**1.导入JDBC场景**
+
+```xml
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jdbc</artifactId>
+        </dependency>
+```
+
+默认使用的数据源是**HikariDataSource**
+
+因为官方不知道你要用什么数据库，所以需要手动导入驱动。
+
+```xml
+默认版本：<mysql.version>8.0.22</mysql.version>
+
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+<!--            <version>5.1.49</version>-->
+        </dependency>
+想要修改版本
+1、直接依赖引入具体版本（maven的就近依赖原则）
+2、重新声明版本（maven的属性的就近优先原则）
+    <properties>
+        <java.version>1.8</java.version>
+        <mysql.version>5.1.49</mysql.version>
+    </properties>
+```
+
+**2.修改配置项**
+
+```yaml
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/db_account
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.jdbc.Driver
+```
+
+**3.测试**
+
+```java
+@Slf4j
+@SpringBootTest
+class Boot05WebAdminApplicationTests {
+
+    @Autowired
+    JdbcTemplate jdbcTemplate;
+
+
+    @Test
+    void contextLoads() {
+
+//        jdbcTemplate.queryForObject("select * from account_tbl")
+//        jdbcTemplate.queryForList("select * from account_tbl",)
+        Long aLong = jdbcTemplate.queryForObject("select count(*) from account_tbl", Long.class);
+        log.info("记录总数：{}",aLong);
+    }
+
+}
+```
+
+#### 使用druid数据源
+
+**1.手动方式**
+
+整合第三方技术的两种方式
+
+1. 自定义
+2. starter
+
+**druid官方github地址：**   https://github.com/alibaba/druid
+
+具体如何在springboot中手动整合druid见wiki。
+
+**2.使用官方starter**
 
 
 
@@ -594,6 +731,36 @@ public class AdminWebConfig implements WebMvcConfigurer {
     }
 }
 
+```
+
+### 错误处理
+
+For example, to map `404` to a static HTML file, your directory structure would be as follows:
+
+```none
+src/
+ +- main/
+     +- java/
+     |   + <source code>
+     +- resources/
+         +- public/
+             +- error/
+             |   +- 404.html
+             +- <other public assets>
+```
+
+To map all `5xx` errors by using a FreeMarker template, your directory structure would be as follows:
+
+```none
+src/
+ +- main/
+     +- java/
+     |   + <source code>
+     +- resources/
+         +- templates/
+             +- error/
+             |   +- 5xx.ftlh
+             +- <other templates>
 ```
 
 

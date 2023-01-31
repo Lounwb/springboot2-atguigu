@@ -1,16 +1,21 @@
 package com.lounwb.admin.controller;
 
 import com.lounwb.admin.bean.User;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpSession;
 
 @Controller
 public class IndexController {
+    @Autowired
+    JdbcTemplate jdbcTemplate;
     /**
      * 登录页
      * @return
@@ -64,5 +69,11 @@ public class IndexController {
         session.removeAttribute("user");
 
         return "redirect:/";
+    }
+    @ResponseBody
+    @GetMapping("/query")
+    public String queryFromDB(){
+        Long aLong = jdbcTemplate.queryForObject("select count(*) from owner", Long.class);
+        return aLong.toString();
     }
 }
