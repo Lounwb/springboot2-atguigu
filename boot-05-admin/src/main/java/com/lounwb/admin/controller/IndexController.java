@@ -1,6 +1,10 @@
 package com.lounwb.admin.controller;
 
+import com.lounwb.admin.bean.Account;
+import com.lounwb.admin.bean.City;
 import com.lounwb.admin.bean.User;
+import com.lounwb.admin.service.AccountService;
+import com.lounwb.admin.service.CityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
@@ -8,6 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpSession;
@@ -16,6 +21,10 @@ import javax.servlet.http.HttpSession;
 public class IndexController {
     @Autowired
     JdbcTemplate jdbcTemplate;
+    @Autowired
+    AccountService accountService;
+    @Autowired
+    CityService cityService;
     /**
      * 登录页
      * @return
@@ -75,5 +84,20 @@ public class IndexController {
     public String queryFromDB(){
         Long aLong = jdbcTemplate.queryForObject("select count(*) from owner", Long.class);
         return aLong.toString();
+    }
+    @ResponseBody
+    @GetMapping("/act")
+    public Account getActById(@RequestParam("id") Integer id){
+        return accountService.getActById(id);
+    }
+    @ResponseBody
+    @GetMapping("/city")
+    public City getCityById(@RequestParam("id") Integer id){
+        return cityService.getById(id);
+    }
+    @ResponseBody
+    @PostMapping("/city")
+    public void saveCity(City city){
+        cityService.insert(city);
     }
 }

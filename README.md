@@ -103,7 +103,56 @@ public static void main(String[] args) {
 
    有xxx组件才会生效，可以标注在类上（组件），也可以标注在方法上
 
-### 控制层注解
+### 业务层注解Service
+
+#### @Service
+
+MVC架构模式
+
+```
+src/
+ +- main/
+     +- java/
+        + service/
+           + impl/
+           |    + <UserServiceImpl>(java)
+           + <UserService>(Interface)
+```
+
+需要在业务层实现类上标注@Service，如果整合MybatisPlus需要extends ServiceImpl<UserMapper, User>
+
+```java
+@Service
+public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
+
+}
+```
+
+而接口UserService需要继承IService<User>，表明这个业务层是对User对象操作
+
+```java
+public interface UserService extends IService<User> {
+
+}
+```
+
+### DAO层注解Mapper
+
+#### @Mapper
+
+如果使用Mybatis需要在Mapper上标注@Mapper，表明这是一个dao
+
+如果使用Myabtis-Plus，则需要继承BaseMapper<bean>，表明对Bean进行操作
+
+```java
+public interface UserMapper extends BaseMapper<User> {
+
+}
+```
+
+整合mybatis-plus不需要写sql，都是逆向生成。
+
+### 控制层注解Controller
 
 #### @RestController
 
@@ -152,7 +201,7 @@ public class Car {
 
 
 
-### 配置类注解
+### 配置类注解Config
 
 #### @Configuration
 
@@ -218,11 +267,23 @@ public class Car {
 标注在形参上面
 
 ```java
-@RequestMapping("/hello")
-public String handle01(@RequestParam("name") String name){
-    log.info(name + "访问/hello");
-    return "Hello,Spring boot2! " + name;
-}
+@GetMapping("/dynamic_table")
+    public String dynamic_table(@RequestParam(value = "pn",defaultValue = "1")Integer pn, Model model){
+//        List<User> users = Arrays.asList(new User("zhangsan", "123456"),
+//                new User("lisi", "123444"),
+//                new User("wangwu", "aaaa"),
+//                new User("zhaoliu", "1234bbb"));
+//        model.addAttribute("users", users);
+       // List<User> list = userService.list();
+        //如何进行分页查询
+        Page<User> page = new Page<>(pn, 2);
+        //分页查询对象
+        Page<User> userPage = userService.page(page, null);
+
+        model.addAttribute("page", userPage);
+
+        return "table/dynamic_table";
+    }
 ```
 
 #### @PathVariable
@@ -234,16 +295,15 @@ public String handle01(@RequestParam("name") String name){
 如果想拿到88和zhangsan可以搭配@GetMapping使用
 
 ```java
-@GetMapping("/car/{id}/owner/{username}")
-public Map<String, Object> getCar(@PathVariable("id") Integer id,
-                                  @PathVariable("username") String username,
-                                  @PathVariable Map<String, String> pv) {
-    Map<String, Object> map = new HashMap<>();
+@GetMapping("/user/delete/{id}")
+public String deleteUser(@PathVariable("id") Long id,
+                         @RequestParam(value = "pn", defaultValue = "1") Integer pn,
+                         RedirectAttributes ra){
+    //RedirectAttributes可以向请求中添加参数.
+    userService.removeById(id);
+    ra.addAttribute("pn", pn);
 
-    map.put("id", id);
-    map.put("username", username);
-    map.put("pv", pv);
-    return map;
+    return "redirect:/dynamic_table";
 }
 ```
 
@@ -260,7 +320,7 @@ public Map<String, Object> getCar(@PathVariable("id") Integer id,
 
 ## web开发
 
-#### web原生组件注入（Servlet,Filter,Listener）
+### web原生组件注入（Servlet,Filter,Listener）
 
 **1.在主应用类上添加注释@ServletComponentScan(basePackages="servlet的扫描路径")**
 
@@ -314,7 +374,7 @@ public class MyRegistConfig {
 }
 ```
 
-#### 数据访问
+### 数据访问
 
 **1.导入JDBC场景**
 
@@ -380,7 +440,7 @@ class Boot05WebAdminApplicationTests {
 }
 ```
 
-#### 使用druid数据源
+### 使用druid数据源
 
 **1.手动方式**
 
@@ -395,7 +455,182 @@ class Boot05WebAdminApplicationTests {
 
 **2.使用官方starter**
 
+### 整合MyBatis
 
+```xml
+<!--只需要一个mybatis stater即可 -->
+<dependency>
+    <groupId>org.mybatis.spring.boot</groupId>
+    <artifactId>mybatis-spring-boot-starter</artifactId>
+    <version>2.1.4</version>
+</dependency>
+```
+
+#### 配置模式
+
+**1.配置模式**
+
+```yaml
+# 配置mybatis规则
+mybatis:
+  config-location: classpath:mybatis/mybatis-config.xml  #全局配置文件位置
+  mapper-locations: classpath:mybatis/mapper/*.xml  #sql映射文件位置
+```
+
+```xml
+<!-- myabtis-config.xml文件 -->
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+  <environments default="development">
+    <environment id="development">
+      <transactionManager type="JDBC"/>
+      <dataSource type="POOLED">
+        <property name="driver" value="${driver}"/>
+        <property name="url" value="${url}"/>
+        <property name="username" value="${username}"/>
+        <property name="password" value="${password}"/>
+      </dataSource>
+    </environment>
+  </environments>
+  <mappers>
+    <mapper resource="org/mybatis/example/BlogMapper.xml"/>
+  </mappers>
+</configuration>
+```
+
+```xml
+<!--xxx.xml文件 -->
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atguigu.admin.mapper.AccountMapper">
+<!--    public Account getAcct(Long id); -->
+    <select id="getAcct" resultType="com.atguigu.admin.bean.Account">
+        select * from  account_tbl where  id=#{id}
+    </select>
+</mapper>
+```
+
+使用方式：
+
+1. 导入mybatis官方starter
+
+2. 编写mapper接口。标准@Mapper注解
+
+   ```java
+   @Mapper
+   public interface AccountMapper {
+       public Account getActById(Integer id);
+   }
+   ```
+
+3. 编写sql映射文件并绑定mapper接口
+
+4. 在application.yaml中指定Mapper配置文件的位置，以及指定全局配置文件的信息 （建议；**配置在mybatis.configuration**）
+
+#### 注解模式
+
+使用方式：
+
+1. 引入mybatis-starter
+
+2. **配置application.yaml中，指定mapper-location位置即可**
+
+   ```yaml
+   mybatis:
+   #  config-location: classpath:mybatis/mybatis-config.xml
+     mapper-locations: classpath:mybatis/mapper/*.xml
+   #	java驼峰命名转数据库中字段命名方式 userId->user_id
+     configuration:
+       map-underscore-to-camel-case: true
+   ```
+
+3. 编写Mapper接口并标注@Mapper注解
+
+   ```java
+   @Mapper
+   public interface CityMapper {
+       //不需要写
+       @Select("select * from city where id=#{id}")
+       public City getById(Integer id);
+   
+       public void insert(City city);
+   }
+   ```
+
+4. 简单方法直接注解方式
+
+5. 复杂方法编写mapper.xml进行绑定映射
+
+6. *@MapperScan("com.atguigu.admin.mapper") 简化，其他的接口就可以不用标注@Mapper注解*
+
+   写到主应用上
+
+   ```java
+   @MapperScan("com.lounwb.admin.mapper")
+   @ServletComponentScan
+   @SpringBootApplication
+   public class Boot05AdminApplication {
+   
+       public static void main(String[] args) {
+           SpringApplication.run(Boot05AdminApplication.class, args);
+       }
+   
+   }
+   ```
+
+### 整合Mybatis-Plus
+
+```xml
+<dependency>
+    <groupId>com.baomidou</groupId>
+    <artifactId>mybatis-plus-boot-starter</artifactId>
+    <version>3.4.1</version>
+</dependency>
+```
+
+**优点：**
+
+-  只需要我们的Mapper继承 **BaseMapper** 就可以拥有crud能力
+
+使用方式：
+
+1. 引入场景启动器starter
+
+2. 不需要写@Mapper,直接在主程序上@MapperScan("com.lounwb.admin.mapper")批量扫描
+
+3. 在控制层Controller引入业务层对象
+
+   ```java
+   @Controller
+   public class TableController {
+       @Autowired
+       UserService userService;
+       
+       @GetMapping("/user/delete/{id}")
+       public String deleteUser(@PathVariable("id") Long id,
+                                @RequestParam(value = "pn", defaultValue = "1") Integer pn,
+                                RedirectAttributes ra){
+           //
+           userService.removeById(id);
+           ra.addAttribute("pn", pn);
+   
+           return "redirect:/dynamic_table";
+       }
+       
+   }
+   ```
+
+4. 编写Service层接口和实现类
+
+   接口继承IService<bean>,实现类继承ServiceImpl<mapper,bean>
+
+5. 在Dao层继承BaseMapper<bean>
+6. 在controller中调用service.xxx方法即可，不需要写sql语句
 
 ## 配置文件
 
